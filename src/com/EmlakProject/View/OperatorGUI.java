@@ -1,16 +1,15 @@
 package com.EmlakProject.View;
 
-import com.EmlakProject.Model.Emlak;
-import com.EmlakProject.Model.Musteriler;
-import com.EmlakProject.Model.Operator;
+import com.EmlakProject.Model.*;
 import com.EmlakProject.Helper.*;
-import com.EmlakProject.Model.User;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -56,6 +55,12 @@ public class OperatorGUI extends JFrame {
     private JTextField fld_musteri_uyelik_tipi;
     private JTextField fld_musteri_adres;
     private JButton btn_musteri_add;
+    private JButton backupButton;
+    private JButton restoreButton;
+    private JScrollPane scrl_silinen_list;
+    private JTable tbl_silinen_list;
+    private JButton silButton;
+    private JTextField fld_musteri_id;
 
     private DefaultTableModel mdl_user_list;
     private Object[] row_user_list;
@@ -65,8 +70,14 @@ public class OperatorGUI extends JFrame {
     private Object[] row_emlak_list;  //ilanlar tablosundaki rowlari temsil eden object
 
 
+    private  JPopupMenu musteriMenu;
     private DefaultTableModel mdl_musteri_list; //musteri tablosunun modelini ayarliyoruz
     private Object[] row_musteri_list;
+
+    private DefaultTableModel mdl_silinen_list;
+    private Object[] row_silien_list;
+
+
 
     private final Operator operator;
 
@@ -139,6 +150,29 @@ public class OperatorGUI extends JFrame {
             }
         });
 
+//        tbl_musteri_list.getModel().addTableModelListener(e -> {
+//            if(e.getType() == TableModelEvent.UPDATE){
+//                int user_id = Integer.parseInt(tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),0).toString());
+//                String musteri_ad = tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),1).toString();
+//                String musteri_soyad = tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),2).toString();
+//                String musteri_numara = tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),3).toString();
+//                String musteri_mail = tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),4).toString();
+//                String musteri_uyelik_tipi = tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),5).toString();
+//                String musteri_adres= tbl_musteri_list.getValueAt(tbl_musteri_list.getSelectedRow(),6).toString();
+//
+//                if(Musteriler.update(user_id,musteri_ad,musteri_soyad,musteri_numara,musteri_mail,musteri_uyelik_tipi,musteri_adres)){
+//                    Helper.showMsg("done");
+//                }
+//                loadMusteriModel();
+//            }
+//        });
+
+
+
+
+
+
+
 
         // ilanlar tablosunda ilan guncelle sil islemleri
         // ilan ustune sag tiklayinca ortaya cikar
@@ -201,18 +235,34 @@ public class OperatorGUI extends JFrame {
         });
 
 
-
         //musteri tablosu
 
         mdl_musteri_list = new DefaultTableModel();
-        Object[] col_musteri_list = {"ID","Ad","Soyad","Numara","Mail","Uyelik Tipi","Adres"};
+        Object[] col_musteri_list = {"ID", "Ad", "Soyad", "Numara", "Mail", "Uyelik Tipi", "Adres"};
         mdl_musteri_list.setColumnIdentifiers(col_musteri_list);
         row_musteri_list = new Object[col_musteri_list.length];
         loadMusteriModel();
 
+//        musteriMenu = new JPopupMenu();
+//        JMenuItem updateMenu1 = new JMenuItem("Guncelle");
+//        JMenuItem deleteMenu1 = new JMenuItem("Sil");
+//        musteriMenu.add(updateMenu1);
+//        musteriMenu.add(deleteMenu1);
+
+
         tbl_musteri_list.setModel(mdl_musteri_list);
+//        tbl_musteri_list.setComponentPopupMenu(musteriMenu);
         tbl_musteri_list.getTableHeader().setReorderingAllowed(false);
         tbl_musteri_list.getColumnModel().getColumn(0).setMaxWidth(50); //burasi id column kismini daha kucuk gosterir
+
+//        tbl_musteri_list.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mousePressed(MouseEvent e) {
+//                Point point = e.getPoint();
+//                int selected_row = tbl_musteri_list.rowAtPoint(point);
+//                tbl_musteri_list.setRowSelectionInterval(selected_row,selected_row);
+//            }
+//        });
 
 
 
@@ -302,12 +352,13 @@ public class OperatorGUI extends JFrame {
             }
 
         });
+
         btn_musteri_add.addActionListener(e -> {
-            if(Helper.isFieldEmpty(fld_musteri_ad) || Helper.isFieldEmpty(fld_musteri_adres) || Helper.isFieldEmpty(fld_musteri_mail) || Helper.isFieldEmpty(fld_musteri_numara) || Helper.isFieldEmpty(fld_musteri_soyad) || Helper.isFieldEmpty(fld_musteri_uyelik_tipi)){
+            if (Helper.isFieldEmpty(fld_musteri_ad) || Helper.isFieldEmpty(fld_musteri_adres) || Helper.isFieldEmpty(fld_musteri_mail) || Helper.isFieldEmpty(fld_musteri_numara) || Helper.isFieldEmpty(fld_musteri_soyad) || Helper.isFieldEmpty(fld_musteri_uyelik_tipi)) {
                 Helper.showMsg("fill");
-            }else {
-                if(Musteriler.add(fld_musteri_ad.getText(),fld_musteri_soyad.getText(),fld_musteri_numara.getText(),fld_musteri_mail.getText(),fld_musteri_uyelik_tipi.getText(),fld_musteri_adres.getText())){
-                    Helper.showMsg("done");
+            } else {
+                if (Musteriler.add(fld_musteri_ad.getText(), fld_musteri_soyad.getText(), fld_musteri_numara.getText(), fld_musteri_mail.getText(), fld_musteri_uyelik_tipi.getText(), fld_musteri_adres.getText())) {
+                    Helper.showMsg("tabloya bir musteri eklendi");
                     loadMusteriModel();
                     fld_musteri_ad.setText(null);
                     fld_musteri_soyad.setText(null);
@@ -315,11 +366,68 @@ public class OperatorGUI extends JFrame {
                     fld_musteri_adres.setText(null);
                     fld_musteri_mail.setText(null);
                     fld_musteri_uyelik_tipi.setText(null);
-                }else{
+                } else {
                     Helper.showMsg("error");
                 }
             }
         });
+
+        silButton.addActionListener(e -> {
+            if (Helper.isFieldEmpty(fld_musteri_id)) {
+                Helper.showMsg("fill");
+            } else {
+                if (Helper.confirm("sure")) {
+
+                    int user_id = Integer.parseInt(fld_musteri_id.getText());
+                    Musteriler.addTable(user_id);
+                    if (Musteriler.delete(user_id)) {
+                        Helper.showMsg("done");
+                        loadMusteriModel();
+                        loadSilinenModel();
+                    } else {
+                        Helper.showMsg("error");
+                    }
+                }
+            }
+        });
+
+
+        backupButton.addActionListener(e -> Backup());
+
+        restoreButton.addActionListener(e -> Restore());
+
+
+
+
+        //Silinen Musteriler
+
+        mdl_silinen_list = new DefaultTableModel();
+        Object[] col_silinen_list = {"ID", "Ad", "Soyad", "Numara", "Mail", "Uyelik Tipi", "Adres"};
+        mdl_silinen_list.setColumnIdentifiers(col_silinen_list);
+        row_silien_list = new Object[col_silinen_list.length];
+        loadSilinenModel();
+
+        tbl_silinen_list.setModel(mdl_silinen_list);
+        tbl_silinen_list.getColumnModel().getColumn(0).setMaxWidth(50);
+
+
+
+    }
+
+    private void loadSilinenModel() {
+        DefaultTableModel clearModel = (DefaultTableModel) tbl_silinen_list.getModel();
+        clearModel.setRowCount(0);
+        for(SilinenMusteri obj : SilinenMusteri.getList()){
+            int i = 0;
+            row_silien_list[i++] = obj.getId();
+            row_silien_list[i++] = obj.getAd();
+            row_silien_list[i++] = obj.getSoyad();
+            row_silien_list[i++] = obj.getNumara();
+            row_silien_list[i++] = obj.getMail();
+            row_silien_list[i++] = obj.getUyelik_tipi();
+            row_silien_list[i++] = obj.getAdres();
+            mdl_silinen_list.addRow(row_silien_list);
+        }
     }
 
 
@@ -328,7 +436,7 @@ public class OperatorGUI extends JFrame {
         DefaultTableModel clearModel = (DefaultTableModel) tbl_musteri_list.getModel();
         clearModel.setRowCount(0);
 
-        for(Musteriler obj : Musteriler.getList()){
+        for (Musteriler obj : Musteriler.getList()) {
             int i = 0;
             row_musteri_list[i++] = obj.getId();
             row_musteri_list[i++] = obj.getAd();
@@ -414,18 +522,54 @@ public class OperatorGUI extends JFrame {
 //    }
 
 
+    //BACKUP CODE
+
+    public static void Backup() {
+        //String query = "RESTORE DATABASE Deneme1 FROM DISK = 'C:\\Program Files\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\Deneme1.bak'";
+        try {
+            String strSelect = "BACKUP DATABASE EmlakDBMS TO DISK = 'C:\\Program Files\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\EmlakDBMS.bak' ";
+            Connection con = DB_Connector.getInstance();
+            boolean bool = con.createStatement().execute(strSelect);
+            System.out.println(!bool);
+            con.close();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static void Restore() {
+        try {
+            String query = "RESTORE DATABASE EmlakDBMS FROM DISK = 'C:\\Program Files\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\Backup\\EmlakDBMS.bak'";
+            Connection con = DB_Connector.getInstance();
+            boolean bool = con.createStatement().execute(query);
+            System.out.println(!bool);
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
+
+
+
     public static void main(String[] args) {
         Operator op = new Operator();
-        op.setId(1);
-        op.setFullName("Emirhan");
-        op.setPass("1234");
-        op.setTitle("operator");
-        op.setUsername("mustafa");
+//        op.setId(1);
+//        op.setFullName("Emirhan");
+//        op.setPass("1234");
+//        op.setTitle("operator");
+//        op.setUsername("mustafa");
 
 //        showWindow();
 
         OperatorGUI opGUI = new OperatorGUI(op);
-
         Helper.setLayout();
+
+
     }
 }

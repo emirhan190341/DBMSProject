@@ -4,6 +4,7 @@ import com.EmlakProject.Helper.Config;
 import com.EmlakProject.Helper.Helper;
 import com.EmlakProject.Model.Emlak;
 import com.EmlakProject.Model.Operator;
+import com.EmlakProject.Model.Sekreter;
 import com.EmlakProject.Model.User;
 
 import javax.swing.*;
@@ -40,6 +41,10 @@ public class LoginGUI extends JFrame {
                         case "sekreter":
                             SekreterGUI sekreterGUI = new SekreterGUI();
                             break;
+                        case "danisman":
+                            DanismanGUI danismanGUI = new DanismanGUI();
+
+
 
                     }
                     dispose();

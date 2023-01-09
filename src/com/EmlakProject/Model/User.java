@@ -172,6 +172,8 @@ public class User {
                         break;
                     case "sekreter":
                         obj = new Sekreter();
+                    case "danisman":
+                        obj = new Danisman();
                     default:
                         obj = new User();
                 }
@@ -191,6 +193,8 @@ public class User {
 
         return obj;
     }
+
+
 
     public static boolean delete(int id) {
         String query = "DELETE FROM PEOPLE WHERE ID=?";

@@ -29,6 +29,9 @@ public class Emlak {
         this.field = field;
     }
 
+    public Emlak(int id) {
+    }
+
     public int getID() {
         return ID;
     }
@@ -103,6 +106,24 @@ public class Emlak {
         return emlakList;
     }
 
+    public static ArrayList<Emlak> getListOfID() {
+        ArrayList<Emlak> emlakList = new ArrayList<>();
+        Emlak obj;
+
+        try {
+            Statement st = DB_Connector.getInstance().createStatement();
+            ResultSet rs = st.executeQuery("Select ID from Ilanlar1");
+            while (rs.next()) {
+                obj = new Emlak(rs.getInt("ID"));
+                emlakList.add(obj);
+
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return emlakList;
+    }
+
 
     //ilan ekleme
     public static boolean add(int ID, int noticeNumber, String housingType, String noticeType, String city, int price, int field) {
@@ -166,6 +187,8 @@ public class Emlak {
         }
         return obj;
     }
+
+
 
     public static boolean delete(int ID){
         String query = "Delete from Ilanlar1 Where ID = ?";

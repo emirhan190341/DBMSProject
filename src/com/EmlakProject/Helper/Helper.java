@@ -1,9 +1,12 @@
 package com.EmlakProject.Helper;
 
+import com.EmlakProject.Model.Emlak;
 import com.EmlakProject.View.OperatorGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Helper {
 
@@ -74,6 +77,21 @@ public class Helper {
 
     }
 
+
+    public static void showIDMessage(JTextField ID){
+        ArrayList<Emlak> emlaks = Emlak.getListOfID();
+        for (Emlak item:emlaks) {
+            if(String.valueOf(item).equals(String.valueOf(ID)))
+            {
+                System.out.println("Lutfen farkli bir ID kullaniniz.");
+            }
+        }
+
+    }
+
+
+
+
     //onaylama sorusu
     public static boolean confirm(String str) {
         emlakPageTR();
@@ -90,6 +108,9 @@ public class Helper {
 
         return JOptionPane.showConfirmDialog(null, msg, "Son Kararın Mı ?", JOptionPane.YES_NO_OPTION) == 0;
     }
+
+
+
 
     public static void emlakPageTR() {
         UIManager.put("OptionPane.okButtonText", "Tamam");

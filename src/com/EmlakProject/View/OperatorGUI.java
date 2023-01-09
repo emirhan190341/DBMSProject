@@ -8,7 +8,10 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -61,6 +64,7 @@ public class OperatorGUI extends JFrame {
     private JTable tbl_silinen_list;
     private JButton silButton;
     private JTextField fld_musteri_id;
+    private JButton excelDosyasinaKaydetButton;
 
     private DefaultTableModel mdl_user_list;
     private Object[] row_user_list;
@@ -70,13 +74,12 @@ public class OperatorGUI extends JFrame {
     private Object[] row_emlak_list;  //ilanlar tablosundaki rowlari temsil eden object
 
 
-    private  JPopupMenu musteriMenu;
+    private JPopupMenu musteriMenu;
     private DefaultTableModel mdl_musteri_list; //musteri tablosunun modelini ayarliyoruz
     private Object[] row_musteri_list;
 
     private DefaultTableModel mdl_silinen_list;
     private Object[] row_silien_list;
-
 
 
     private final Operator operator;
@@ -168,12 +171,6 @@ public class OperatorGUI extends JFrame {
 //        });
 
 
-
-
-
-
-
-
         // ilanlar tablosunda ilan guncelle sil islemleri
         // ilan ustune sag tiklayinca ortaya cikar
         emlakMenu = new JPopupMenu();
@@ -263,7 +260,6 @@ public class OperatorGUI extends JFrame {
 //                tbl_musteri_list.setRowSelectionInterval(selected_row,selected_row);
 //            }
 //        });
-
 
 
         //kullanici ekleme
@@ -397,8 +393,6 @@ public class OperatorGUI extends JFrame {
         restoreButton.addActionListener(e -> Restore());
 
 
-
-
         //Silinen Musteriler
 
         mdl_silinen_list = new DefaultTableModel();
@@ -411,13 +405,31 @@ public class OperatorGUI extends JFrame {
         tbl_silinen_list.getColumnModel().getColumn(0).setMaxWidth(50);
 
 
+        //musteri excel dosyasina kaydet
+        excelDosyasinaKaydetButton.addActionListener(e -> {
+            Connection con;
+            String query = "Select * from Musteriler";
 
+            {
+                try {
+                    con = DB_Connector.getInstance();
+                    PreparedStatement pr = con.prepareStatement(query);
+                    ResultSet rs = pr.executeQuery();
+                    ResultSetToExcelApp.writeToExcel(rs, "Musteriler.xlsx");
+
+                    rs.close();
+                    con.close();
+                } catch (SQLException | ClassNotFoundException | IOException a) {
+                    a.printStackTrace();
+                }
+            }
+        });
     }
 
     private void loadSilinenModel() {
         DefaultTableModel clearModel = (DefaultTableModel) tbl_silinen_list.getModel();
         clearModel.setRowCount(0);
-        for(SilinenMusteri obj : SilinenMusteri.getList()){
+        for (SilinenMusteri obj : SilinenMusteri.getList()) {
             int i = 0;
             row_silien_list[i++] = obj.getId();
             row_silien_list[i++] = obj.getAd();
@@ -550,11 +562,6 @@ public class OperatorGUI extends JFrame {
         }
 
     }
-
-
-
-
-
 
 
     public static void main(String[] args) {
